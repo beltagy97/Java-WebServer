@@ -5,26 +5,43 @@
  */
 package javawebserver;
 
+import java.io.BufferedOutputStream;
+import java.io.BufferedReader;
 import java.io.IOException;
+import java.io.PrintWriter;
 import java.net.ServerSocket;
 import java.net.Socket;
 
-
 public class JavaWebServer {
-    
+
     private static final int port = 4000;
-    
-    public static void main(String[] args) throws IOException {
-        ServerSocket server = new ServerSocket(port);
-        System.out.println("Web Server has started successfully");
-        
-        while(true)
-        {
-            Socket socket = server.accept();
-            System.out.println("connection established");
-            
-        }
-        
+    private static final String IndexFile = "Index.html";
+    private static final String FileNotFound = "404.html";
+
+//    response message hander
+    public void SendResponse(BufferedReader input,PrintWriter out ,BufferedOutputStream dataOut ,boolean isValidMethod) {
+
     }
-    
+
+    public static void main(String[] args) throws IOException {
+
+        try {
+            ServerSocket server = new ServerSocket(port);
+            server.setSoTimeout(100000);
+            System.out.println("Web Server has started successfully");
+
+            while (true) {
+                
+                    Socket socket = server.accept();
+                    System.out.println("connection established");
+                
+
+            }
+
+        } catch (IOException e) {
+            System.out.println("Server connection error : " + e);
+        }
+
+    }
+
 }
