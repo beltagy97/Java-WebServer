@@ -8,6 +8,7 @@ package javawebserver;
 import java.io.BufferedOutputStream;
 import java.io.BufferedReader;
 import java.io.DataInputStream;
+import java.io.DataOutputStream;
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.net.ServerSocket;
@@ -15,21 +16,21 @@ import java.net.Socket;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
-public class JavaWebServer implements Runnable{
+public class JavaWebServer implements Runnable {
 
     private static final int port = 4000;
-    private static final String IndexFile = "Index.html";
-    private static final String FileNotFound = "404.html";
-
+    private static final String IndexFile = "INDEX.HTML";
+    private static final String FileNotFound = "404.HTML";
     private Socket client;
 
     public JavaWebServer(Socket skt) {
         client = skt;
     }
 
-//    response message hander
-    public void SendResponse(BufferedReader input, PrintWriter out, BufferedOutputStream dataOut, boolean isValidMethod) {
-
+    //validate header
+    public boolean isValidHeader(String header) {
+        header = header.toUpperCase();
+        return header.contains("GET") || header.contains("POST");
     }
 
     public static void main(String[] args) throws IOException {
@@ -58,16 +59,40 @@ public class JavaWebServer implements Runnable{
      */
     @Override
     public void run() {
-        
-        System.out.println("Just connected to " + client.getRemoteSocketAddress());
+
+        System.out.println("Connection established with " + client.getRemoteSocketAddress());
         DataInputStream in;
+        DataOutputStream out;
+        BufferedOutputStream dataOut;
+
         try {
+
             in = new DataInputStream(client.getInputStream());
-            System.out.println(in.readUTF());
+            out = new DataOutputStream(client.getOutputStream());
+            dataOut = new BufferedOutputStream(client.getOutputStream());
+
+            String header = in.readUTF();
+
+//            check if valid request or a bad request
+            boolean validHeader = isValidHeader(header);
+            System.out.println(header);
+
+            if (validHeader) {
+                out.writeUTF("HTTP/1.0 OK");
+                out.flush();
+            } else {
+                out.writeUTF("404 Bad Request");
+                out.flush();
+
+            }
+
+          
+           
+           
         } catch (IOException ex) {
             Logger.getLogger(JavaWebServer.class.getName()).log(Level.SEVERE, null, ex);
         }
-        
+
     }
 
 }
