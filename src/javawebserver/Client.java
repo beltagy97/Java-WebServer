@@ -11,66 +11,66 @@ import java.io.IOException;
 import java.net.Socket;
 import java.net.UnknownHostException;
 
-
-
-
 public class Client {
-    
-    private Socket socket            = null; 
-    private DataInputStream  input   = null; 
-    private DataOutputStream out     = null; 
-  
-     
-    public Client(String address, int port) 
-    { 
-        
-        try
-        { 
-            socket = new Socket(address, port); 
-            System.out.println("Connected"); 
 
-            input  = new DataInputStream(System.in); 
-            out    = new DataOutputStream(socket.getOutputStream()); 
-        } 
-        catch(UnknownHostException u) 
-        { 
-            System.out.println(u); 
-        } 
-        catch(IOException i) 
-        { 
-            System.out.println(i); 
-        } 
-  
-       
-        String line = ""; 
-  
-         
-        while (!line.equalsIgnoreCase("exit")) 
-        { 
-            try
-            { 
-                line = input.readLine(); 
-                out.writeUTF(line); 
-            } 
-            catch(IOException i) 
-            { 
-                System.out.println(i); 
-            } 
-        } 
-        try
-        { 
-            input.close(); 
-            out.close(); 
-            socket.close(); 
-        } 
-        catch(IOException i) 
-        { 
-            System.out.println(i); 
-        } 
-    }
-    public static void main(String[] args) throws IOException {
-        Client clientSocket = new Client("127.0.0.1",4000);
+    private Socket socket = null;
+    private DataInputStream inputRequest = null;
+    private DataOutputStream out = null;
+    private DataInputStream input = null;
+    private String request = "";
+    private String response = "";
+
+    public Client(String address, int port) throws IOException {
+
+        try {
+            socket = new Socket(address, port);
+            System.out.println("Connected");
+
+            input = new DataInputStream(socket.getInputStream());
+            inputRequest = new DataInputStream(System.in);
+            out = new DataOutputStream(socket.getOutputStream());
+
+        } catch (UnknownHostException u) {
+            System.out.println(u);
+        } catch (IOException i) {
+            System.out.println("Target host server is down !");
+        }
+
         
+        try {
+            request = inputRequest.readLine();
+            out.writeUTF(request);
+        } catch (IOException i) {
+            System.out.println(i);
+        }
+
+        
+//        reading response from web server
+        try {
+
+            response = input.readUTF();
+            System.out.println(response);
+        } catch (IOException i) {
+            System.out.println(i);
+        }
+
+        
+//        closing socket , input and output streams
+        try {
+            inputRequest.close();
+            input.close();
+            out.close();
+            socket.close();
+
+        } catch (IOException i) {
+            System.out.println(i);
+        }
+
     }
-    
+
+    public static void main(String[] args) throws IOException {
+        Client clientSocket = new Client("127.0.0.1", 4000);
+
+    }
+
 }
