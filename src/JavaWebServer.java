@@ -37,7 +37,7 @@ public class JavaWebServer implements Runnable {
         client = skt;
     }
 
-    private static void copyFileUsingStream(File source, File dest ,DataOutputStream out) throws IOException {
+    private static boolean copyFileUsingStream(File source, File dest ) throws IOException {
         InputStream is = null;
         OutputStream os = null;
         try {
@@ -53,10 +53,9 @@ public class JavaWebServer implements Runnable {
 
             is.close();
             os.close();
-
+            return true;
         } catch (FileNotFoundException e) {
-            out.writeUTF("404 Not Found");
-            out.flush();
+            return false;
         }
     }
 
@@ -66,7 +65,7 @@ public class JavaWebServer implements Runnable {
         String pattern = "(GET|POST)\\s+(.+)\\s+(.+)\\s*";
         Pattern r = Pattern.compile(pattern);
         Matcher m = r.matcher(header);
-
+        
         if (m.find()) {
             methodType = m.group(1);
             return m.group(3);
@@ -121,8 +120,8 @@ public class JavaWebServer implements Runnable {
 //            check if valid request or a bad request
             String filename = isValidHeader(header);
 
-            System.out.println(header);
-
+//            System.out.println(header);
+//            System.out.println(filename);
             if (filename != null) {
 
                 // Get or Post 
@@ -138,7 +137,14 @@ public class JavaWebServer implements Runnable {
                 Path p = Paths.get(dest);
                 Path p2 = Paths.get(src);
 
-                copyFileUsingStream(p2.toFile(), p.toFile() , out);
+                if(copyFileUsingStream(p2.toFile(), p.toFile()))
+                {
+                    System.out.println("File transfer successful for socket :"+client.getPort());
+                }
+                else
+                {
+                    System.out.println("File transfer unsuccessful for socket :"+client.getPort());
+                }
 
                 out.writeUTF("HTTP/1.0 200 OK");
                 out.flush();
@@ -147,9 +153,23 @@ public class JavaWebServer implements Runnable {
                 out.flush();
 
             }
+            
+            try {
+                client.close();
+                System.out.println("connection is closed for socket "+client.getPort());
+                System.out.println("");
+            } catch (IOException ex1) {
+                Logger.getLogger(JavaWebServer.class.getName()).log(Level.SEVERE, null, ex1);
+            }
+            
 
         } catch (IOException ex) {
             Logger.getLogger(JavaWebServer.class.getName()).log(Level.SEVERE, null, ex);
+            try {
+                client.close();
+            } catch (IOException ex1) {
+                Logger.getLogger(JavaWebServer.class.getName()).log(Level.SEVERE, null, ex1);
+            }
         }
 
     }
