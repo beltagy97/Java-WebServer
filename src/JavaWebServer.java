@@ -140,14 +140,17 @@ public class JavaWebServer implements Runnable {
                 if(copyFileUsingStream(p2.toFile(), p.toFile()))
                 {
                     System.out.println("File transfer successful for socket :"+client.getPort());
+                    out.writeUTF("HTTP/1.0 200 OK");
+                    out.flush();
                 }
                 else
                 {
                     System.out.println("File transfer unsuccessful for socket :"+client.getPort());
+                    out.writeUTF("403 File not found");
+                    out.flush();
                 }
 
-                out.writeUTF("HTTP/1.0 200 OK");
-                out.flush();
+                
             } else {
                 out.writeUTF("404 Bad Request");
                 out.flush();
